@@ -163,33 +163,3 @@ app.listen(PORT, () => {
   console.log(`✅ Backend on http://localhost:${PORT}`);
 });
 
-// 📦 Guardar nuevo proveedor
-app.post("/proveedores", async (req, res) => {
-  try {
-    const { nombre, iva, percepcion, descuento } = req.body;
-    const result = await pool.query(
-      "INSERT INTO proveedores (nombre, iva, percepcion, descuento) VALUES ($1, $2, $3, $4) RETURNING *",
-      [nombre, iva, percepcion, descuento]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al guardar proveedor" });
-  }
-});
-
-// 📦 Guardar nuevo producto
-app.post("/productos", async (req, res) => {
-  try {
-    const { codigo, nombre, costoNeto, proveedorId, margen, precioFinal } = req.body;
-    const result = await pool.query(
-      "INSERT INTO productos (codigo, nombre, costo_neto, proveedor_id, margen, precio_final) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
-      [codigo, nombre, costoNeto, proveedorId, margen, precioFinal]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al guardar producto" });
-  }
-});
-
