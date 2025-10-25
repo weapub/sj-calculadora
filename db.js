@@ -1,19 +1,43 @@
-import { Pool } from 'pg';
-import dotenv from 'dotenv';
+import pg from "pg";
+import dotenv from "dotenv";
 dotenv.config();
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  console.error('❌ Missing DATABASE_URL in .env');
-  process.exit(1);
-}
+const { Pool } = pg;
 
-export const pool = new Pool({
-  connectionString,
-  ssl: process.env.PGSSL === 'disable' ? false : { rejectUnauthorized: false }
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
 });
 
 export async function query(text, params) {
-  const res = await pool.query(text, params);
-  return res;
+  const client = await pool.connect();
+  try {
+    const res = await client.query(text, params);
+    return res;
+  } finally {
+    client.release();
+  }
+}
+
+export async function initDB() {
+  await query(`
+    CREATE TABLE IF NOT EXISTS proveedores (
+      id SERIAL PRIMARY KEY,
+      nombre TEXT NOT NULL,
+      iva NUMERIC DEFAULT 21,
+      percepcion NUMERIC DEFAULT 0,
+      descuento NUMERIC DEFAULT 0
+    );
+  `);
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS productos (
+      id SERIAL PRIMARY KEY,
+      codigo TEXT,
+      nombre TEXT NOT NULL,
+      precio NUMERIC DEFAULT 0
+    );
+  `);
+
+  console.log("✅ Tablas verificadas correctamente");
 }
