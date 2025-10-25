@@ -39,5 +39,5 @@ export async function initDB() {
     );
   `);
 
-  console.log("✅ Tablas verificadas correctamente");
+  console.log("✅ Base de datos inicializada correctamente");
 }
